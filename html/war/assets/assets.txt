@@ -1,5 +1,5 @@
 d:war/:0:application/unknown
-i:badlogic.jpg:68465:image/jpeg
+i:dog-runner.png:68465:image/png
 t:com/badlogic/gdx/graphics/g3d/particles/particles.fragment.glsl:768:application/unknown
 t:com/badlogic/gdx/graphics/g3d/particles/particles.vertex.glsl:2732:application/unknown
 t:com/badlogic/gdx/graphics/g3d/shaders/default.fragment.glsl:5068:application/unknown
