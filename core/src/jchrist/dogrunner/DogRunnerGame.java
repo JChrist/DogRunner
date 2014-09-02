@@ -20,7 +20,7 @@ import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import jchrist.dogrunner.utils.GifDecoder;
 
 public class DogRunnerGame extends ApplicationAdapter {
-	public static final float DOG_JUMP_IMPULSE = 200;
+	public static final float DOG_JUMP_IMPULSE = 100;
 	public static final float GRAVITY = -10;
 	public static final float DOG_VELOCITY_X = 200;
 	public static final float DOG_START_Y = 240;
@@ -79,6 +79,7 @@ public class DogRunnerGame extends ApplicationAdapter {
 		dog = GifDecoder.loadGIFAnimation(PlayMode.LOOP, 0.05f, Gdx.files.internal("dog.gif").read());
 
 		music = Gdx.audio.newMusic(Gdx.files.internal("music.mp3"));
+		music.setVolume(0.1f);
 		music.setLooping(true);
 		music.play();
 
@@ -106,13 +107,15 @@ public class DogRunnerGame extends ApplicationAdapter {
 		float deltaTime = Gdx.graphics.getDeltaTime();
 		dogStateTime += deltaTime;
 
-		if(Gdx.input.justTouched()) {
+		if(Gdx.input.isTouched()) {
 			if(gameState == GameState.Start) {
 				gameState = GameState.Running;
 			}
+
 			if(gameState == GameState.Running) {
 				dogVelocity.set(DOG_VELOCITY_X, DOG_JUMP_IMPULSE);
 			}
+
 			if(gameState == GameState.GameOver) {
 				gameState = GameState.Start;
 				resetWorld();
