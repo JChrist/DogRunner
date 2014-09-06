@@ -8,25 +8,26 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import jchrist.dogrunner.utils.GifDecoder;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 public class DogRunnerGame extends ApplicationAdapter {
 	public static final float DOG_JUMP_IMPULSE = 100;
 	public static final float GRAVITY = -10;
 	public static final float DOG_VELOCITY_X = 200;
-	public static final float DOG_START_Y = 240;
+
+	public static final float DOG_START_Y = 50;
 	public static final float DOG_START_X = 50;
 
-	private ShapeRenderer shapeRenderer;
 	private SpriteBatch batch;
 	private OrthographicCamera camera;
 	private OrthographicCamera uiCamera;
@@ -52,14 +53,15 @@ public class DogRunnerGame extends ApplicationAdapter {
 	private Rectangle rect1 = new Rectangle();
 	private Rectangle rect2 = new Rectangle();
 	private Music music;
-	private Sound explode;
+	private Sound endSound;
 
 	@Override
 	public void create () {
-		shapeRenderer = new ShapeRenderer();
 		batch = new SpriteBatch();
+
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false, 800, 480);
+
 		uiCamera = new OrthographicCamera();
 		uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		uiCamera.update();
@@ -83,7 +85,7 @@ public class DogRunnerGame extends ApplicationAdapter {
 		music.setLooping(true);
 		music.play();
 
-		explode = Gdx.audio.newSound(Gdx.files.internal("explode.wav"));
+		endSound = Gdx.audio.newSound(Gdx.files.internal("dogcry.mp3"));
 
 		resetWorld();
 	}
@@ -98,7 +100,7 @@ public class DogRunnerGame extends ApplicationAdapter {
 
 		rocks.clear();
 		for(int i = 0; i < 5; i++) {
-			boolean isDown = MathUtils.randomBoolean();
+			boolean isDown = ThreadLocalRandom.current().nextBoolean();
 			rocks.add(new Rock(700 + i * 200, isDown?500-rock.getRegionHeight(): 0, isDown? rockDown: rock));
 		}
 	}
@@ -142,7 +144,7 @@ public class DogRunnerGame extends ApplicationAdapter {
 			}
 			rect2.set(r.position.x + (r.image.getRegionWidth() - 30) / 2 + 20, r.position.y, 20, r.image.getRegionHeight() - 10);
 			if(rect1.overlaps(rect2)) {
-				if(gameState != GameState.GameOver) explode.play();
+				if (gameState != GameState.GameOver) endSound.play();
 				gameState = GameState.GameOver;
 				dogVelocity.x = 0;
 			}
@@ -152,11 +154,8 @@ public class DogRunnerGame extends ApplicationAdapter {
 			}
 		}
 
-		if(dogPosition.y < ground.getRegionHeight() - 40 ||
-				dogPosition.y + dog.getKeyFrames()[0].getRegionHeight() > 500 - ground.getRegionHeight() + 20) {
-			if(gameState != GameState.GameOver) explode.play();
-			gameState = GameState.GameOver;
-			dogVelocity.x = 0;
+		if (dogPosition.y < ground.getRegionHeight()) {
+			dogPosition.y = ground.getRegionHeight();
 		}
 	}
 
@@ -196,6 +195,10 @@ public class DogRunnerGame extends ApplicationAdapter {
 		drawWorld();
 	}
 
+	static enum GameState {
+		Start, Running, GameOver
+	}
+
 	static class Rock {
 		Vector2 position = new Vector2();
 		TextureRegion image;
@@ -206,9 +209,5 @@ public class DogRunnerGame extends ApplicationAdapter {
 			this.position.y = y;
 			this.image = image;
 		}
-	}
-
-	static enum GameState {
-		Start, Running, GameOver
 	}
 }
